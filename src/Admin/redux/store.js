@@ -1,6 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
+import nguoiDungReducer from './nguoiDungSlice';
+
 export const store = configureStore({
   reducer: {
-    // your reducers here
+    nguoiDung: nguoiDungReducer,
   },
 });
