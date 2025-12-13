@@ -3,18 +3,10 @@ import { MA_NHOM } from "./config";
 
 export const dichVuKhoaHoc = {
   layDanhSachKhoaHoc: (tenKhoaHoc = "", trang = 1, soLuong = 10) => {
-    const params = {
-      MaNhom: MA_NHOM,
-      page: trang,
-      pageSize: soLuong,
-    };
-
-    if (tenKhoaHoc && tenKhoaHoc.trim() !== "") {
-      params.tenKhoaHoc = tenKhoaHoc;
-    }
-
+    const params = { MaNhom: MA_NHOM, page: trang, pageSize: soLuong };
+    if (tenKhoaHoc && tenKhoaHoc.trim() !== "") params.tenKhoaHoc = tenKhoaHoc;
     return dichVuHttp.get(`/api/QuanLyKhoaHoc/LayDanhSachKhoaHoc_PhanTrang`, {
-      params: params,
+      params,
     });
   },
 
@@ -26,7 +18,7 @@ export const dichVuKhoaHoc = {
 
   layThongTinKhoaHoc: (maKhoaHoc) => {
     return dichVuHttp.get(`/api/QuanLyKhoaHoc/LayThongTinKhoaHoc`, {
-      params: { maKhoaHoc: maKhoaHoc },
+      params: { maKhoaHoc },
     });
   },
 
@@ -47,34 +39,35 @@ export const dichVuKhoaHoc = {
     );
   },
 
-  capNhatKhoaHoc: (formData) => {
+  capNhatKhoaHocUpload: (formData) => {
     return dichVuHttp.post("/api/QuanLyKhoaHoc/CapNhatKhoaHocUpload", formData);
+  },
+
+  capNhatKhoaHoc: (data) => {
+    return dichVuHttp.put("/api/QuanLyKhoaHoc/CapNhatKhoaHoc", data);
   },
 
   layDsNguoiDungChuaGhiDanh: (maKhoaHoc) => {
     return dichVuHttp.post(
       `/api/QuanLyNguoiDung/LayDanhSachNguoiDungChuaGhiDanh`,
-      { maKhoaHoc: maKhoaHoc }
+      { maKhoaHoc }
     );
   },
-
   layDsHocVienKhoaHoc: (maKhoaHoc) => {
     return dichVuHttp.post(`/api/QuanLyNguoiDung/LayDanhSachHocVienKhoaHoc`, {
-      maKhoaHoc: maKhoaHoc,
+      maKhoaHoc,
     });
   },
-
   ghiDanhKhoaHoc: (maKhoaHoc, taiKhoan) => {
     return dichVuHttp.post(`/api/QuanLyKhoaHoc/GhiDanhKhoaHoc`, {
-      maKhoaHoc: maKhoaHoc,
-      taiKhoan: taiKhoan,
+      maKhoaHoc,
+      taiKhoan,
     });
   },
-
   huyGhiDanh: (maKhoaHoc, taiKhoan) => {
     return dichVuHttp.post(`/api/QuanLyKhoaHoc/HuyGhiDanh`, {
-      maKhoaHoc: maKhoaHoc,
-      taiKhoan: taiKhoan,
+      maKhoaHoc,
+      taiKhoan,
     });
   },
 };

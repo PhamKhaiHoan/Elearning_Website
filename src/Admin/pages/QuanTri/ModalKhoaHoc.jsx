@@ -11,7 +11,7 @@ import { X, Upload } from "lucide-react";
 const schemaKhoaHoc = z.object({
   maKhoaHoc: z.string().min(1, "Mã khóa học không được để trống"),
   tenKhoaHoc: z.string().min(1, "Tên khóa học không được để trống"),
-  moTa: z.string().min(10, "Mô tả phải có ít nhất 10 ký tự"),
+  moTa: z.string().min(1, "Mô tả không được để trống"),
   maDanhMucKhoaHoc: z.string().min(1, "Vui lòng chọn danh mục"),
 });
 
@@ -78,32 +78,57 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
 
   const xuLyGuiForm = async (data) => {
     try {
-      const formData = new FormData();
-      formData.append("maKhoaHoc", data.maKhoaHoc);
-      formData.append("tenKhoaHoc", data.tenKhoaHoc);
-      formData.append("moTa", data.moTa);
-      formData.append("maNhom", MA_NHOM);
+      const userLogin = JSON.parse(localStorage.getItem("USER_LOGIN"));
+      const taiKhoanNguoiTao =
+        duLieuSua?.nguoiTao?.taiKhoan || userLogin?.taiKhoan || "admin_test";
 
       if (duLieuSua) {
-        formData.append("ngayTao", duLieuSua.ngayTao || layNgayHienTai());
-      } else {
-        formData.append("ngayTao", layNgayHienTai());
-      }
+        if (fileHinhAnh) {
+          const formData = new FormData();
+          formData.append("maKhoaHoc", data.maKhoaHoc);
+          formData.append("tenKhoaHoc", data.tenKhoaHoc);
+          formData.append("moTa", data.moTa);
+          formData.append("maNhom", MA_NHOM);
+          formData.append("ngayTao", duLieuSua.ngayTao || layNgayHienTai());
+          formData.append("maDanhMucKhoaHoc", data.maDanhMucKhoaHoc);
+          formData.append("taiKhoanNguoiTao", taiKhoanNguoiTao);
+          formData.append("file", fileHinhAnh);
 
-      formData.append("maDanhMucKhoaHoc", data.maDanhMucKhoaHoc);
-      formData.append("taiKhoanNguoiTao", "admin_test");
+          await dichVuKhoaHoc.capNhatKhoaHocUpload(formData);
+        } else {
+          const payload = {
+            maKhoaHoc: data.maKhoaHoc,
+            tenKhoaHoc: data.tenKhoaHoc,
+            moTa: data.moTa,
+            maNhom: MA_NHOM,
+            ngayTao: duLieuSua.ngayTao || layNgayHienTai(),
+            maDanhMucKhoaHoc: data.maDanhMucKhoaHoc,
+            taiKhoanNguoiTao: taiKhoanNguoiTao,
+            hinhAnh: duLieuSua.hinhAnh,
+            luotXem: duLieuSua.luotXem || 0,
+            biDanh:
+              duLieuSua.biDanh ||
+              data.tenKhoaHoc.toLowerCase().replace(/\s/g, "-"),
+          };
 
-      if (fileHinhAnh) {
-        formData.append("file", fileHinhAnh);
-      } else if (!duLieuSua) {
-        alert("Vui lòng chọn hình ảnh cho khóa học mới!");
-        return;
-      }
-
-      if (duLieuSua) {
-        await dichVuKhoaHoc.capNhatKhoaHoc(formData);
+          await dichVuKhoaHoc.capNhatKhoaHoc(payload);
+        }
         alert("Cập nhật khóa học thành công!");
       } else {
+        if (!fileHinhAnh) {
+          alert("Vui lòng chọn hình ảnh cho khóa học mới!");
+          return;
+        }
+        const formData = new FormData();
+        formData.append("maKhoaHoc", data.maKhoaHoc);
+        formData.append("tenKhoaHoc", data.tenKhoaHoc);
+        formData.append("moTa", data.moTa);
+        formData.append("maNhom", MA_NHOM);
+        formData.append("ngayTao", layNgayHienTai());
+        formData.append("maDanhMucKhoaHoc", data.maDanhMucKhoaHoc);
+        formData.append("taiKhoanNguoiTao", taiKhoanNguoiTao); // Dùng user đang login
+        formData.append("file", fileHinhAnh);
+
         await dichVuKhoaHoc.themKhoaHoc(formData);
         alert("Thêm khóa học thành công!");
       }
@@ -112,7 +137,10 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
       taiLaiTrang();
     } catch (error) {
       console.error("Lỗi submit:", error);
-      alert(error.response?.data || "Có lỗi xảy ra!");
+      alert(
+        error.response?.data ||
+          "Có lỗi xảy ra! Hãy kiểm tra lại quyền người tạo."
+      );
     }
   };
 
@@ -231,7 +259,7 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
               />
             </div>
             <p className="text-xs text-gray-500 text-center">
-              Nhấn vào khung trên để chọn ảnh mới
+              Nhấn vào khung trên để chọn ảnh mới (Không bắt buộc khi sửa)
             </p>
           </div>
           <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t">
