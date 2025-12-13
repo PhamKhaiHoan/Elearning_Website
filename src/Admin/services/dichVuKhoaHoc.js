@@ -16,7 +16,6 @@ export const dichVuKhoaHoc = {
     );
   },
 
-  // 👇 THÊM HÀM NÀY: Gọi cái này mới lấy được số lượng học viên chuẩn
   layThongTinKhoaHoc: (maKhoaHoc) => {
     return dichVuHttp.get(
       `/api/QuanLyKhoaHoc/LayThongTinKhoaHoc?maKhoaHoc=${maKhoaHoc}`

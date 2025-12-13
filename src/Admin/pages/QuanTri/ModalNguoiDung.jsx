@@ -6,13 +6,12 @@ import { dichVuNguoiDung } from "../../services/dichVuNguoiDung";
 import { MA_NHOM } from "../../services/config";
 import { X } from "lucide-react";
 
-// 👇 1. Thêm hàm lấy ngày
 const layNgayHienTai = () => {
   const today = new Date();
   const dd = String(today.getDate()).padStart(2, "0");
   const mm = String(today.getMonth() + 1).padStart(2, "0");
   const yyyy = today.getFullYear();
-  return `${dd}/${mm}/${yyyy}`; // Định dạng dd/MM/yyyy
+  return `${dd}/${mm}/${yyyy}`; 
 };
 
 const schemaNguoiDung = z.object({
@@ -71,11 +70,10 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
 
   const xuLyGuiForm = async (data) => {
     try {
-      // 👇 2. Thêm ngayTao vào dữ liệu gửi đi
       const duLieuGuiDi = {
         ...data,
         maNhom: MA_NHOM,
-        ngayTao: duLieuSua ? duLieuSua.ngayTao : layNgayHienTai(), // Nếu sửa thì giữ cũ, thêm thì lấy mới
+        ngayTao: duLieuSua ? duLieuSua.ngayTao : layNgayHienTai(),
       };
 
       if (duLieuSua) {
@@ -111,10 +109,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
         </div>
 
         <form onSubmit={handleSubmit(xuLyGuiForm)} className="p-6 space-y-4">
-          {/* ... (Giữ nguyên các Input Tài khoản, Mật khẩu, Họ tên, Email, Số ĐT, Loại ND) ... */}
-
-          {/* (Phần code Form Input ông giữ y nguyên như file cũ nhé, chỉ thay đổi logic xuLyGuiForm ở trên thôi) */}
-          {/* Để gọn code tôi không paste lại toàn bộ JSX form input, ông dùng lại phần return của file cũ */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tài Khoản

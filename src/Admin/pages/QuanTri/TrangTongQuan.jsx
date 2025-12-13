@@ -29,7 +29,6 @@ const TrangTongQuan = () => {
   const [khoaHocMoi, setKhoaHocMoi] = useState([]);
   const [dataBieuDo, setDataBieuDo] = useState([]);
 
-  // Hàm parse ngày
   const parseNgayThang = (strDate) => {
     if (!strDate) return 0;
     const parts = strDate.split("/");
@@ -50,10 +49,9 @@ const TrangTongQuan = () => {
         const dsNguoiDung = resNguoiDung.data || [];
         const dsKhoaHoc = resKhoaHoc.data || [];
 
-        // 1. CỘT TRÁI: Khóa Học Mới Nhất (Sort ngày tạo)
         if (dsKhoaHoc.length > 0) {
           const sortedNewCourses = [...dsKhoaHoc]
-            .reverse() // Đảo ngược để đưa khóa mới lên đầu
+            .reverse()
             .sort(
               (a, b) => parseNgayThang(b.ngayTao) - parseNgayThang(a.ngayTao)
             )
@@ -61,39 +59,39 @@ const TrangTongQuan = () => {
           setKhoaHocMoi(sortedNewCourses);
         }
 
-        // 2. CỘT PHẢI: Biểu đồ Top Ghi Danh (Logic lấy số liệu thật)
         if (dsKhoaHoc.length > 0) {
-          // B1: Lấy top 10 khóa có lượt xem cao nhất làm ứng viên
           const candidates = [...dsKhoaHoc]
             .sort((a, b) => b.luotXem - a.luotXem)
-            .slice(0, 10);
+            .slice(0, 15);
 
-          // B2: Gọi API chi tiết cho 10 khóa này để lấy số lượng học viên CHÍNH XÁC
-          const detailPromises = candidates.map((kh) =>
-            dichVuKhoaHoc.layThongTinKhoaHoc(kh.maKhoaHoc)
+          const requests = candidates.map((kh) =>
+            dichVuKhoaHoc
+              .layDsHocVienKhoaHoc(kh.maKhoaHoc)
+              .then((res) => ({
+                ...kh,
+                soLuongHocVienThucTe: res.data ? res.data.length : 0,
+              }))
+              .catch(() => ({
+                ...kh,
+                soLuongHocVienThucTe: 0,
+              }))
           );
 
-          const details = await Promise.all(detailPromises);
+          const results = await Promise.all(requests);
 
-          // B3: Map dữ liệu chuẩn từ API chi tiết
-          const finalData = details.map((res) => {
-            const info = res.data;
-            return {
+          const top5Real = results
+            .sort((a, b) => b.soLuongHocVienThucTe - a.soLuongHocVienThucTe)
+            .slice(0, 5)
+            .map((item) => ({
               name:
-                info.tenKhoaHoc.length > 15
-                  ? info.tenKhoaHoc.substring(0, 15) + "..."
-                  : info.tenKhoaHoc,
-              uv: info.soLuongHocVien || 0, // Số liệu thật đây rồi!
-              fullDate: info.ngayTao,
-            };
-          });
-
-          // B4: Sắp xếp lại theo số lượng học viên thật và lấy Top 5 để vẽ
-          const top5Real = finalData.sort((a, b) => b.uv - a.uv).slice(0, 5);
+                item.tenKhoaHoc.length > 15
+                  ? item.tenKhoaHoc.substring(0, 15) + "..."
+                  : item.tenKhoaHoc,
+              uv: item.soLuongHocVienThucTe,
+            }));
 
           setDataBieuDo(top5Real);
 
-          // Cập nhật thống kê tổng (Dùng tổng view cho đẹp vì tổng HV load hết rất nặng)
           setThongKe({
             nguoiDung: dsNguoiDung.length,
             khoaHoc: dsKhoaHoc.length,
@@ -156,7 +154,7 @@ const TrangTongQuan = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* CỘT TRÁI: KHÓA HỌC MỚI NHẤT */}
+        {/* KHÓA HỌC MỚI NHẤT */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-112.5">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <Zap size={20} className="text-orange-500" /> Khóa Học Mới Nhất
@@ -183,11 +181,6 @@ const TrangTongQuan = () => {
                       {kh.tenKhoaHoc}
                     </p>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                        <UserCheck size={12} />
-                        {/* Dùng lượt xem có sẵn cho danh sách mới */}
-                        <span>{kh.luotXem} xem</span>
-                      </div>
                       <div className="flex items-center gap-1 text-xs text-gray-400">
                         <Calendar size={12} />
                         <span>{kh.ngayTao || "Vừa xong"}</span>
@@ -200,7 +193,7 @@ const TrangTongQuan = () => {
           </div>
         </div>
 
-        {/* CỘT PHẢI: BIỂU ĐỒ TOP GHI DANH (DỮ LIỆU THẬT) */}
+        {/* BIỂU ĐỒ TOP GHI DANH */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-112.5">
           <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
             <BarChart3 className="text-green-500" size={20} />
@@ -218,8 +211,8 @@ const TrangTongQuan = () => {
               >
                 <defs>
                   <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
