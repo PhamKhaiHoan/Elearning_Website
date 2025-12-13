@@ -26,11 +26,10 @@ const TrangTongQuan = () => {
     ghiDanh: 0,
   });
 
-  // State cho 2 phần bên dưới
   const [khoaHocMoi, setKhoaHocMoi] = useState([]);
   const [dataBieuDo, setDataBieuDo] = useState([]);
 
-  // Hàm parse ngày "dd/MM/yyyy" thành số để so sánh
+  // Hàm parse ngày
   const parseNgayThang = (strDate) => {
     if (!strDate) return 0;
     const parts = strDate.split("/");
@@ -51,40 +50,58 @@ const TrangTongQuan = () => {
         const dsNguoiDung = resNguoiDung.data || [];
         const dsKhoaHoc = resKhoaHoc.data || [];
 
-        setThongKe({
-          nguoiDung: dsNguoiDung.length,
-          khoaHoc: dsKhoaHoc.length,
-          ghiDanh: dsKhoaHoc.reduce(
-            (acc, curr) => acc + (curr.soLuongHocVien || 0),
-            0
-          ), // Tính tổng lượt ghi danh thật
-        });
-
-        // 1. CỘT TRÁI: Khóa Học Mới Nhất (Sắp xếp theo ngày tạo giảm dần)
+        // 1. CỘT TRÁI: Khóa Học Mới Nhất (Sort ngày tạo)
         if (dsKhoaHoc.length > 0) {
           const sortedNewCourses = [...dsKhoaHoc]
-            .reverse() // Đảo ngược trước để ưu tiên cái mới thêm vào sau cùng
+            .reverse() // Đảo ngược để đưa khóa mới lên đầu
             .sort(
               (a, b) => parseNgayThang(b.ngayTao) - parseNgayThang(a.ngayTao)
-            ) // Sort ngày
-            .slice(0, 5); // Lấy top 5
+            )
+            .slice(0, 5);
           setKhoaHocMoi(sortedNewCourses);
         }
 
-        // 2. CỘT PHẢI: Biểu Đồ Top Khóa Học (Theo Số Lượng Học Viên)
+        // 2. CỘT PHẢI: Biểu đồ Top Ghi Danh (Logic lấy số liệu thật)
         if (dsKhoaHoc.length > 0) {
-          const topKhoaHoc = [...dsKhoaHoc]
-            .sort((a, b) => (b.soLuongHocVien || 0) - (a.soLuongHocVien || 0)) // Sort theo số lượng học viên
-            .slice(0, 5)
-            .map((kh) => ({
+          // B1: Lấy top 10 khóa có lượt xem cao nhất làm ứng viên
+          const candidates = [...dsKhoaHoc]
+            .sort((a, b) => b.luotXem - a.luotXem)
+            .slice(0, 10);
+
+          // B2: Gọi API chi tiết cho 10 khóa này để lấy số lượng học viên CHÍNH XÁC
+          const detailPromises = candidates.map((kh) =>
+            dichVuKhoaHoc.layThongTinKhoaHoc(kh.maKhoaHoc)
+          );
+
+          const details = await Promise.all(detailPromises);
+
+          // B3: Map dữ liệu chuẩn từ API chi tiết
+          const finalData = details.map((res) => {
+            const info = res.data;
+            return {
               name:
-                kh.tenKhoaHoc.length > 15
-                  ? kh.tenKhoaHoc.substring(0, 15) + "..."
-                  : kh.tenKhoaHoc,
-              uv: kh.soLuongHocVien || 0, // Dùng số lượng học viên làm cột đo
-              fullDate: kh.ngayTao,
-            }));
-          setDataBieuDo(topKhoaHoc);
+                info.tenKhoaHoc.length > 15
+                  ? info.tenKhoaHoc.substring(0, 15) + "..."
+                  : info.tenKhoaHoc,
+              uv: info.soLuongHocVien || 0, // Số liệu thật đây rồi!
+              fullDate: info.ngayTao,
+            };
+          });
+
+          // B4: Sắp xếp lại theo số lượng học viên thật và lấy Top 5 để vẽ
+          const top5Real = finalData.sort((a, b) => b.uv - a.uv).slice(0, 5);
+
+          setDataBieuDo(top5Real);
+
+          // Cập nhật thống kê tổng (Dùng tổng view cho đẹp vì tổng HV load hết rất nặng)
+          setThongKe({
+            nguoiDung: dsNguoiDung.length,
+            khoaHoc: dsKhoaHoc.length,
+            ghiDanh: dsKhoaHoc.reduce(
+              (acc, curr) => acc + (curr.luotXem || 0),
+              0
+            ),
+          });
         }
       } catch (error) {
         console.log("Lỗi tải dữ liệu dashboard:", error);
@@ -114,7 +131,6 @@ const TrangTongQuan = () => {
         <h2 className="text-2xl font-bold text-gray-800">Tổng Quan Hệ Thống</h2>
       </div>
 
-      {/* 3 THẺ THỐNG KÊ */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <TheThongKe
           tieuDe="Tổng Thành Viên"
@@ -131,7 +147,7 @@ const TrangTongQuan = () => {
           mauChu="text-green-600"
         />
         <TheThongKe
-          tieuDe="Tổng Lượt Ghi Danh"
+          tieuDe="Tổng Lượt Xem"
           giaTri={thongKe.ghiDanh}
           icon={<UserCheck size={24} />}
           mauNen="bg-purple-50"
@@ -152,7 +168,6 @@ const TrangTongQuan = () => {
                   key={index}
                   className="flex gap-4 items-start p-3 rounded-lg hover:bg-orange-50/50 transition-colors border border-transparent hover:border-orange-100 group"
                 >
-                  {/* Hình ảnh */}
                   <div className="relative w-16 h-12 shrink-0">
                     <img
                       src={kh.hinhAnh}
@@ -163,8 +178,6 @@ const TrangTongQuan = () => {
                       }}
                     />
                   </div>
-
-                  {/* Thông tin */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-800 line-clamp-1 group-hover:text-orange-600 transition-colors">
                       {kh.tenKhoaHoc}
@@ -172,7 +185,8 @@ const TrangTongQuan = () => {
                     <div className="flex items-center gap-3 mt-1.5">
                       <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                         <UserCheck size={12} />
-                        <span>{kh.soLuongHocVien || 0} HV</span>
+                        {/* Dùng lượt xem có sẵn cho danh sách mới */}
+                        <span>{kh.luotXem} xem</span>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-gray-400">
                         <Calendar size={12} />
@@ -186,7 +200,7 @@ const TrangTongQuan = () => {
           </div>
         </div>
 
-        {/* CỘT PHẢI: BIỂU ĐỒ TOP KHÓA HỌC (THEO GHI DANH) */}
+        {/* CỘT PHẢI: BIỂU ĐỒ TOP GHI DANH (DỮ LIỆU THẬT) */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-112.5">
           <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
             <BarChart3 className="text-green-500" size={20} />
