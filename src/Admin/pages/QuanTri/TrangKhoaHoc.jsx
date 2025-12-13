@@ -14,6 +14,7 @@ import {
 import ModalKhoaHoc from "./ModalKhoaHoc";
 import ModalGhiDanh from "./ModalGhiDanh";
 import useDebounce from "../../extensions/hooks/useDebounce";
+import { toast } from "react-toastify";
 
 const TrangKhoaHoc = () => {
   const dispatch = useDispatch();
@@ -71,10 +72,10 @@ const TrangKhoaHoc = () => {
     if (window.confirm(`Bạn có chắc muốn xóa khóa học ${maKhoaHoc}?`)) {
       try {
         await dichVuKhoaHoc.xoaKhoaHoc(maKhoaHoc);
-        alert("Xóa thành công!");
+        toast.success("Xóa thành công!");
         layDuLieu();
       } catch (error) {
-        alert(error.response?.data || "Xóa thất bại!");
+        toast.error(error.response?.data || "Xóa thất bại!");
       }
     }
   };

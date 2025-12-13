@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import ModalNguoiDung from "./ModalNguoiDung";
 import useDebounce from "../../extensions/hooks/useDebounce";
+import { toast } from "react-toastify";
 
 const TrangNguoiDung = () => {
   const dispatch = useDispatch();
@@ -68,10 +69,10 @@ const TrangNguoiDung = () => {
     if (window.confirm(`Bạn có chắc muốn xóa tài khoản: ${taiKhoan}?`)) {
       try {
         await dichVuNguoiDung.xoaNguoiDung(taiKhoan);
-        alert("Xóa thành công!");
+        toast.success("Xóa thành công!");
         layDuLieu();
       } catch (error) {
-        alert(error.response?.data || "Có lỗi xảy ra khi xóa!");
+        toast.error(error.response?.data || "Có lỗi xảy ra khi xóa!");
       }
     }
   };

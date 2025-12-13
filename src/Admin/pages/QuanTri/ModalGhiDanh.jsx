@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { dichVuKhoaHoc } from "../../services/dichVuKhoaHoc";
 import { X, UserPlus, Trash2, UserCheck } from "lucide-react";
+import { toast } from "react-toastify";
 
 const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
   const [dsChuaGhiDanh, setDsChuaGhiDanh] = useState([]);
@@ -12,7 +13,7 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
   const layDuLieuGhiDanh = async () => {
     if (!maKhoaHoc) return;
 
-    setDangTai(true); 
+    setDangTai(true);
     try {
       const [resChuaGhiDanh, resDaGhiDanh] = await Promise.all([
         dichVuKhoaHoc.layDsNguoiDungChuaGhiDanh(maKhoaHoc),
@@ -23,7 +24,7 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
     } catch (error) {
       console.log("Lỗi load dữ liệu ghi danh:", error);
     } finally {
-      setDangTai(false); 
+      setDangTai(false);
     }
   };
 
@@ -35,14 +36,14 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
   }, [dangMo, maKhoaHoc]);
 
   const xuLyGhiDanh = async () => {
-    if (!taiKhoanChon) return alert("Vui lòng chọn người dùng!");
+    if (!taiKhoanChon) return toast.error("Vui lòng chọn người dùng!");
     try {
       await dichVuKhoaHoc.ghiDanhKhoaHoc(maKhoaHoc, taiKhoanChon);
-      alert("Ghi danh thành công!");
+      toast.success("Ghi danh thành công!");
       layDuLieuGhiDanh();
       setTaiKhoanChon("");
     } catch (error) {
-      alert(error.response?.data || "Ghi danh thất bại!");
+      toast.error(error.response?.data || "Ghi danh thất bại!");
     }
   };
 
@@ -50,10 +51,10 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
     if (window.confirm(`Xóa học viên ${taiKhoan} khỏi khóa học?`)) {
       try {
         await dichVuKhoaHoc.huyGhiDanh(maKhoaHoc, taiKhoan);
-        alert("Hủy ghi danh thành công!");
+        toast.success("Hủy ghi danh thành công!");
         layDuLieuGhiDanh();
       } catch (error) {
-        alert(error.response?.data || "Hủy thất bại!");
+        toast.error(error.response?.data || "Hủy thất bại!");
       }
     }
   };

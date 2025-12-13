@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { dichVuNguoiDung } from "../../services/dichVuNguoiDung";
 import { MA_NHOM } from "../../services/config";
 import { X } from "lucide-react";
+import { toast } from "react-toastify";
 
 const layNgayHienTai = () => {
   const today = new Date();
@@ -85,17 +86,17 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
           duLieuGuiDi.matKhau = duLieuSua.matKhau;
         }
         await dichVuNguoiDung.capNhatNguoiDung(duLieuGuiDi);
-        alert("Cập nhật thành công!");
+        toast.success("Cập nhật thành công!");
       } else {
-        if (!data.matKhau) return alert("Vui lòng nhập mật khẩu!");
+        if (!data.matKhau) return toast.error("Vui lòng nhập mật khẩu!");
         await dichVuNguoiDung.themNguoiDung(duLieuGuiDi);
-        alert("Thêm mới thành công!");
+        toast.success("Thêm mới thành công!");
       }
 
       dongModal();
       taiLaiTrang();
     } catch (error) {
-      alert(error.response?.data || "Đã có lỗi xảy ra!");
+      toast.error(error.response?.data || "Đã có lỗi xảy ra!");
     }
   };
 

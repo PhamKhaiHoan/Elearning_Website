@@ -7,6 +7,7 @@ import { dichVuKhoaHoc } from "../../services/dichVuKhoaHoc";
 import { layDanhMucKhoaHocThunk } from "../../redux/khoaHocSlice";
 import { MA_NHOM } from "../../services/config";
 import { X, Upload } from "lucide-react";
+import { toast } from "react-toastify";
 
 const schemaKhoaHoc = z.object({
   maKhoaHoc: z.string().min(1, "Mã khóa học không được để trống"),
@@ -113,10 +114,10 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
 
           await dichVuKhoaHoc.capNhatKhoaHoc(payload);
         }
-        alert("Cập nhật khóa học thành công!");
+        toast.success("Cập nhật khóa học thành công!");
       } else {
         if (!fileHinhAnh) {
-          alert("Vui lòng chọn hình ảnh cho khóa học mới!");
+          toast.error("Vui lòng chọn hình ảnh cho khóa học mới!");
           return;
         }
         const formData = new FormData();
@@ -130,14 +131,14 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
         formData.append("file", fileHinhAnh);
 
         await dichVuKhoaHoc.themKhoaHoc(formData);
-        alert("Thêm khóa học thành công!");
+        toast.success("Thêm khóa học thành công!");
       }
 
       dongModal();
       taiLaiTrang();
     } catch (error) {
       console.error("Lỗi submit:", error);
-      alert(
+      toast.error(
         error.response?.data ||
           "Có lỗi xảy ra! Hãy kiểm tra lại quyền người tạo."
       );
