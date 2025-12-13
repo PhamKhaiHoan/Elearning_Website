@@ -15,6 +15,14 @@ const schemaKhoaHoc = z.object({
   maDanhMucKhoaHoc: z.string().min(1, "Vui lòng chọn danh mục"),
 });
 
+const layNgayHienTai = () => {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, "0");
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const yyyy = today.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+};
+
 const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
   const dispatch = useDispatch();
   const { danhMucKhoaHoc } = useSelector((state) => state.khoaHoc);
@@ -75,9 +83,15 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
       formData.append("tenKhoaHoc", data.tenKhoaHoc);
       formData.append("moTa", data.moTa);
       formData.append("maNhom", MA_NHOM);
-      formData.append("ngayTao", "01/01/2025"); 
+
+      if (duLieuSua) {
+        formData.append("ngayTao", duLieuSua.ngayTao || layNgayHienTai());
+      } else {
+        formData.append("ngayTao", layNgayHienTai());
+      }
+
       formData.append("maDanhMucKhoaHoc", data.maDanhMucKhoaHoc);
-      formData.append("taiKhoanNguoiTao", "admin_test"); 
+      formData.append("taiKhoanNguoiTao", "admin_test");
 
       if (fileHinhAnh) {
         formData.append("file", fileHinhAnh);
@@ -106,7 +120,6 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-bold text-gray-800">
             {duLieuSua ? "Cập Nhật Khóa Học" : "Thêm Khóa Học Mới"}
@@ -116,12 +129,10 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
           </button>
         </div>
 
-        {/* Form */}
         <form
           onSubmit={handleSubmit(xuLyGuiForm)}
           className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {/* Thông tin text */}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -141,7 +152,6 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
                 </p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tên Khóa Học
@@ -157,7 +167,6 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
                 </p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Danh Mục
@@ -179,7 +188,6 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
                 </p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Mô Tả
@@ -197,13 +205,10 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
               )}
             </div>
           </div>
-
-          {/* Upload Hình */}
           <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Hình Ảnh
             </label>
-
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-50 bg-gray-50 relative">
               {hinhAnhPreview ? (
                 <img
@@ -217,7 +222,6 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
                   <span className="text-sm">Chưa có hình ảnh</span>
                 </div>
               )}
-
               <input
                 type="file"
                 accept="image/*"
@@ -229,8 +233,6 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
               Nhấn vào khung trên để chọn ảnh mới
             </p>
           </div>
-
-          {/* Footer Buttons */}
           <div className="col-span-1 md:col-span-2 flex justify-end gap-3 mt-4 pt-4 border-t">
             <button
               type="button"

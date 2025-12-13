@@ -12,6 +12,15 @@ const TrangTongQuan = () => {
   const [khoaHocMoi, setKhoaHocMoi] = useState([]);
   const [nguoiDungMoi, setNguoiDungMoi] = useState([]);
 
+  const parseNgayThang = (strDate) => {
+    if (!strDate) return 0;
+    const parts = strDate.split("/");
+    if (parts.length === 3) {
+      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+    }
+    return 0;
+  };
+
   useEffect(() => {
     const layDuLieu = async () => {
       try {
@@ -29,7 +38,10 @@ const TrangTongQuan = () => {
           ghiDanh: 150,
         });
         if (dsKhoaHoc && dsKhoaHoc.length > 0) {
-          setKhoaHocMoi(dsKhoaHoc.slice(-5).reverse());
+          const sortedKH = [...dsKhoaHoc].sort((a, b) => {
+            return parseNgayThang(b.ngayTao) - parseNgayThang(a.ngayTao);
+          });
+          setKhoaHocMoi(sortedKH.slice(0, 5)); 
         }
 
         if (dsNguoiDung && dsNguoiDung.length > 0) {
@@ -119,9 +131,6 @@ const TrangTongQuan = () => {
                         {kh.tenKhoaHoc}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                          {kh.luotXem} xem
-                        </span>
                         <span className="text-xs text-gray-400">
                           {kh.ngayTao || "Vừa xong"}
                         </span>
