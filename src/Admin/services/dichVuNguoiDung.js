@@ -2,11 +2,14 @@ import { dichVuHttp } from './dichVuHttp';
 import { MA_NHOM } from './config';
 
 export const dichVuNguoiDung = {
-  layDanhSachNguoiDung: (tuKhoa = '') => {
+  layDanhSachNguoiDung: (tuKhoa = '', trang = 1, soLuong = 50) => {
+    let url = `/api/QuanLyNguoiDung/LayDanhSachNguoiDung_PhanTrang?MaNhom=${MA_NHOM}&page=${trang}&pageSize=${soLuong}`;
+    
     if (tuKhoa.trim() !== '') {
-      return dichVuHttp.get(`/api/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${MA_NHOM}&tuKhoa=${tuKhoa}`);
+      url += `&tuKhoa=${tuKhoa}`;
     }
-    return dichVuHttp.get(`/api/QuanLyNguoiDung/LayDanhSachNguoiDung?MaNhom=${MA_NHOM}`);
+    
+    return dichVuHttp.get(url);
   },
 
   xoaNguoiDung: (taiKhoan) => {

@@ -73,7 +73,7 @@ const LayoutQuanTri = () => {
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">Xin chào, Admin</span>
             <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-              Aaaaaaa
+              A
             </div>
           </div>
         </header>
