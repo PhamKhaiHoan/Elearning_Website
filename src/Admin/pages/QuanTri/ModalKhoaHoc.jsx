@@ -111,6 +111,7 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
       dongModal();
       taiLaiTrang();
     } catch (error) {
+      console.error("Lỗi submit:", error);
       alert(error.response?.data || "Có lỗi xảy ra!");
     }
   };

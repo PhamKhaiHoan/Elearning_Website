@@ -14,9 +14,29 @@ const TrangTongQuan = () => {
 
   const parseNgayThang = (strDate) => {
     if (!strDate) return 0;
-    const parts = strDate.split("/");
+
+    const [datePart, timePart] = strDate.split(" ");
+    if (!datePart) return 0;
+
+    const parts = datePart.split("/");
     if (parts.length === 3) {
-      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+
+      let hour = 0,
+        minute = 0,
+        second = 0;
+      if (timePart) {
+        const timeParts = timePart.split(":");
+        if (timeParts.length >= 2) {
+          hour = parseInt(timeParts[0], 10);
+          minute = parseInt(timeParts[1], 10);
+          second = parseInt(timeParts[2] || 0, 10);
+        }
+      }
+
+      return new Date(year, month, day, hour, minute, second).getTime();
     }
     return 0;
   };
@@ -37,15 +57,16 @@ const TrangTongQuan = () => {
           khoaHoc: dsKhoaHoc.length,
           ghiDanh: 150,
         });
+
         if (dsKhoaHoc && dsKhoaHoc.length > 0) {
           const sortedKH = [...dsKhoaHoc].sort((a, b) => {
             return parseNgayThang(b.ngayTao) - parseNgayThang(a.ngayTao);
           });
-          setKhoaHocMoi(sortedKH.slice(0, 5)); 
+          setKhoaHocMoi(sortedKH.slice(0, 5));
         }
 
         if (dsNguoiDung && dsNguoiDung.length > 0) {
-          setNguoiDungMoi(dsNguoiDung.slice(-5).reverse());
+          setNguoiDungMoi([...dsNguoiDung].reverse().slice(0, 5));
         }
       } catch (error) {
         console.log("Lỗi lấy dữ liệu dashboard:", error);
@@ -75,7 +96,6 @@ const TrangTongQuan = () => {
         <h2 className="text-2xl font-bold text-gray-800">Tổng Quan Hệ Thống</h2>
       </div>
 
-      {/* THẺ SỐ LIỆU */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <TheThongKe
           tieuDe="Tổng Thành Viên"
@@ -100,7 +120,6 @@ const TrangTongQuan = () => {
         />
       </div>
 
-      {/* CỘT HOẠT ĐỘNG */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* KHÓA HỌC MỚI */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-125">
@@ -131,6 +150,9 @@ const TrangTongQuan = () => {
                         {kh.tenKhoaHoc}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                          {kh.luotXem} xem
+                        </span>
                         <span className="text-xs text-gray-400">
                           {kh.ngayTao || "Vừa xong"}
                         </span>
