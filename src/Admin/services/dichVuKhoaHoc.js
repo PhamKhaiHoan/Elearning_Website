@@ -19,11 +19,36 @@ export const dichVuKhoaHoc = {
   },
 
   themKhoaHoc: (formData) => {
-    // Lưu ý: Dùng endpoint UploadHinh để gửi được file ảnh
     return dichVuHttp.post('/api/QuanLyKhoaHoc/ThemKhoaHocUploadHinh', formData);
   },
 
   capNhatKhoaHoc: (formData) => {
     return dichVuHttp.post('/api/QuanLyKhoaHoc/CapNhatKhoaHocUpload', formData);
+  },
+
+  layDsNguoiDungChuaGhiDanh: (maKhoaHoc) => {
+    return dichVuHttp.post(`/api/QuanLyNguoiDung/LayDanhSachNguoiDungChuaGhiDanh`, {
+      MaKhoaHoc: maKhoaHoc
+    });
+  },
+
+  layDsHocVienKhoaHoc: (maKhoaHoc) => {
+    return dichVuHttp.post(`/api/QuanLyNguoiDung/LayDanhSachHocVienKhoaHoc`, {
+      MaKhoaHoc: maKhoaHoc
+    });
+  },
+
+  ghiDanhKhoaHoc: (maKhoaHoc, taiKhoan) => {
+    return dichVuHttp.post(`/api/QuanLyKhoaHoc/GhiDanhKhoaHoc`, {
+      maKhoaHoc: maKhoaHoc,
+      taiKhoan: taiKhoan
+    });
+  },
+
+  huyGhiDanh: (maKhoaHoc, taiKhoan) => {
+    return dichVuHttp.post(`/api/QuanLyKhoaHoc/HuyGhiDanh`, {
+      maKhoaHoc: maKhoaHoc,
+      taiKhoan: taiKhoan
+    });
   }
 };
