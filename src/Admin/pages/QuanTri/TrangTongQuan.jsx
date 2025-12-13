@@ -28,9 +28,13 @@ const TrangTongQuan = () => {
           khoaHoc: dsKhoaHoc.length,
           ghiDanh: 150,
         });
+        if (dsKhoaHoc && dsKhoaHoc.length > 0) {
+          setKhoaHocMoi(dsKhoaHoc.slice(-5).reverse());
+        }
 
-        setKhoaHocMoi(dsKhoaHoc.slice(-5).reverse());
-        setNguoiDungMoi(dsNguoiDung.slice(-5).reverse());
+        if (dsNguoiDung && dsNguoiDung.length > 0) {
+          setNguoiDungMoi(dsNguoiDung.slice(-5).reverse());
+        }
       } catch (error) {
         console.log("Lỗi lấy dữ liệu dashboard:", error);
       }
