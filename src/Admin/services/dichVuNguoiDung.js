@@ -2,7 +2,7 @@ import { dichVuHttp } from './dichVuHttp';
 import { MA_NHOM } from './config';
 
 export const dichVuNguoiDung = {
-  layDanhSachNguoiDung: (tuKhoa = '', trang = 1, soLuong = 50) => {
+  layDanhSachNguoiDung: (tuKhoa = '', trang = 1, soLuong = 30) => {
     let url = `/api/QuanLyNguoiDung/LayDanhSachNguoiDung_PhanTrang?MaNhom=${MA_NHOM}&page=${trang}&pageSize=${soLuong}`;
     
     if (tuKhoa.trim() !== '') {

@@ -1,21 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { layDanhSachNguoiDungThunk } from '../../redux/nguoiDungSlice';
-import { Trash2, Edit, Search, Plus } from 'lucide-react';
 import { dichVuNguoiDung } from '../../services/dichVuNguoiDung';
+import { Trash2, Edit, Search, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const TrangNguoiDung = () => {
   const dispatch = useDispatch();
-  const { danhSachNguoiDung, dangTai } = useSelector((state) => state.nguoiDung);
+  const { danhSachNguoiDung, dangTai, tongSoTrang } = useSelector((state) => state.nguoiDung);
+  
   const [tuKhoa, setTuKhoa] = useState('');
+  const [trangHienTai, setTrangHienTai] = useState(1);
 
   useEffect(() => {
-    dispatch(layDanhSachNguoiDungThunk());
-  }, [dispatch]);
+    dispatch(layDanhSachNguoiDungThunk({ 
+      tuKhoa: tuKhoa, 
+      trang: trangHienTai, 
+      soLuong: 30
+    }));
+  }, [dispatch, trangHienTai, tuKhoa]); 
 
   const xuLyTimKiem = (e) => {
     e.preventDefault();
-    dispatch(layDanhSachNguoiDungThunk(tuKhoa));
+    setTrangHienTai(1); 
+    dispatch(layDanhSachNguoiDungThunk({ tuKhoa, trang: 1, soLuong: 30 }));
   };
 
   const xuLyXoa = async (taiKhoan) => {
@@ -23,10 +30,16 @@ const TrangNguoiDung = () => {
       try {
         await dichVuNguoiDung.xoaNguoiDung(taiKhoan);
         alert('Xóa thành công!');
-        dispatch(layDanhSachNguoiDungThunk()); // Load lại danh sách sau khi xóa
+        dispatch(layDanhSachNguoiDungThunk({ tuKhoa, trang: trangHienTai, soLuong: 30 }));
       } catch (error) {
         alert(error.response?.data || 'Có lỗi xảy ra khi xóa!');
       }
+    }
+  };
+
+  const thayDoiTrang = (soTrangMoi) => {
+    if (soTrangMoi >= 1 && soTrangMoi <= tongSoTrang) {
+      setTrangHienTai(soTrangMoi);
     }
   };
 
@@ -70,13 +83,18 @@ const TrangNguoiDung = () => {
               {dangTai ? (
                 <tr>
                   <td colSpan="7" className="text-center py-8 text-gray-500">
-                    Đang tải dữ liệu...
+                    <div className="flex justify-cwenter items-center gap-2">
+                       <span className="animate-spin h-5 w-5 border-2 border-blue-500 rounded-full border-t-transparent"></span>
+                       Đang tải dữ liệu...
+                    </div>
                   </td>
                 </tr>
               ) : danhSachNguoiDung?.length > 0 ? (
                 danhSachNguoiDung.map((user, index) => (
                   <tr key={user.taiKhoan} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-500">{index + 1}</td>
+                    <td className="px-6 py-4 font-medium text-gray-500">
+                        {(trangHienTai - 1) * 30 + index + 1}
+                    </td>
                     <td className="px-6 py-4 font-semibold text-gray-800">{user.taiKhoan}</td>
                     <td className="px-6 py-4 text-gray-700">{user.hoTen}</td>
                     <td className="px-6 py-4 text-gray-600">{user.email}</td>
@@ -111,13 +129,45 @@ const TrangNguoiDung = () => {
               ) : (
                 <tr>
                   <td colSpan="7" className="text-center py-8 text-gray-500">
-                    Không tìm thấy dữ liệu.
+                    Không tìm thấy dữ liệu nào.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* --- THANH PHÂN TRANG --- */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+           <span className="text-sm text-gray-500">
+              Trang <span className="font-medium text-gray-900">{trangHienTai}</span> / {tongSoTrang}
+           </span>
+           
+           <div className="flex gap-2">
+              <button
+                onClick={() => thayDoiTrang(trangHienTai - 1)}
+                disabled={trangHienTai === 1}
+                className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors
+                  ${trangHienTai === 1 
+                    ? 'border-gray-200 text-gray-300 cursor-not-allowed' 
+                    : 'border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm'}`}
+              >
+                <ChevronLeft size={16} /> Trước
+              </button>
+
+              <button
+                onClick={() => thayDoiTrang(trangHienTai + 1)}
+                disabled={trangHienTai === tongSoTrang}
+                className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors
+                  ${trangHienTai === tongSoTrang 
+                    ? 'border-gray-200 text-gray-300 cursor-not-allowed' 
+                    : 'border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm'}`}
+              >
+                Sau <ChevronRight size={16} />
+              </button>
+           </div>
+        </div>
+
       </div>
     </div>
   );
