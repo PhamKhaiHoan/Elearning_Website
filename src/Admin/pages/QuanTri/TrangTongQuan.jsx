@@ -12,31 +12,12 @@ const TrangTongQuan = () => {
   const [khoaHocMoi, setKhoaHocMoi] = useState([]);
   const [nguoiDungMoi, setNguoiDungMoi] = useState([]);
 
+  // Hàm parse ngày dd/MM/yyyy thành số để so sánh (Dùng cho Khóa học)
   const parseNgayThang = (strDate) => {
     if (!strDate) return 0;
-
-    const [datePart, timePart] = strDate.split(" ");
-    if (!datePart) return 0;
-
-    const parts = datePart.split("/");
+    const parts = strDate.split("/");
     if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
-
-      let hour = 0,
-        minute = 0,
-        second = 0;
-      if (timePart) {
-        const timeParts = timePart.split(":");
-        if (timeParts.length >= 2) {
-          hour = parseInt(timeParts[0], 10);
-          minute = parseInt(timeParts[1], 10);
-          second = parseInt(timeParts[2] || 0, 10);
-        }
-      }
-
-      return new Date(year, month, day, hour, minute, second).getTime();
+      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
     }
     return 0;
   };
@@ -58,13 +39,18 @@ const TrangTongQuan = () => {
           ghiDanh: 150,
         });
 
+        // 1. KHÓA HỌC: Đảo ngược (đưa mới lên đầu) -> Rồi Sort theo ngày (để gom nhóm ngày)
         if (dsKhoaHoc && dsKhoaHoc.length > 0) {
-          const sortedKH = [...dsKhoaHoc].sort((a, b) => {
-            return parseNgayThang(b.ngayTao) - parseNgayThang(a.ngayTao);
-          });
+          const sortedKH = [...dsKhoaHoc]
+            .reverse()
+            .sort(
+              (a, b) => parseNgayThang(b.ngayTao) - parseNgayThang(a.ngayTao)
+            );
           setKhoaHocMoi(sortedKH.slice(0, 5));
         }
 
+        // 2. THÀNH VIÊN: Chỉ cần Đảo ngược (Lấy 5 người cuối cùng đưa lên đầu)
+        // Vì API không trả về 'ngayTao' của user nên ta không thể sort, chỉ reverse là chuẩn nhất.
         if (dsNguoiDung && dsNguoiDung.length > 0) {
           setNguoiDungMoi([...dsNguoiDung].reverse().slice(0, 5));
         }
@@ -76,6 +62,7 @@ const TrangTongQuan = () => {
     layDuLieu();
   }, []);
 
+  // Component Card (Giữ nguyên)
   const TheThongKe = ({ tieuDe, giaTri, icon, mauNen, mauChu }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between transition-transform hover:-translate-y-1">
       <div>
@@ -169,7 +156,7 @@ const TrangTongQuan = () => {
           </div>
         </div>
 
-        {/* NGƯỜI DÙNG MỚI */}
+        {/* THÀNH VIÊN MỚI */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-125">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <UserPlus size={20} className="text-blue-500" /> Thành Viên Mới Nhất
