@@ -183,7 +183,8 @@ const TrangTongQuan = () => {
                     <div className="flex items-center gap-3 mt-1.5">
                       <div className="flex items-center gap-1 text-xs text-gray-400">
                         <Calendar size={12} />
-                        <span>{kh.ngayTao || "Vừa xong"}</span>
+                        <span>{kh.ngayTao}</span>
+                        <span>{kh.nguoiTao.taiKhoan}</span>
                       </div>
                     </div>
                   </div>
