@@ -11,15 +11,19 @@ const layNgayHienTai = () => {
   const dd = String(today.getDate()).padStart(2, "0");
   const mm = String(today.getMonth() + 1).padStart(2, "0");
   const yyyy = today.getFullYear();
-  return `${dd}/${mm}/${yyyy}`; 
+  return `${dd}/${mm}/${yyyy}`;
 };
 
 const schemaNguoiDung = z.object({
   taiKhoan: z.string().min(1, "Tài khoản không được để trống"),
-  matKhau: z
-    .string()
-    .min(6, "Mật khẩu phải ít nhất 6 ký tự")
-    .regex(/^(?=.*[A-Za-z])(?=.*\d).+$/, "Mật khẩu phải có chữ và số"),
+  // Logic mật khẩu: Thêm mới bắt buộc, Sửa thì không bắt buộc (nếu không nhập)
+  matKhau: z.string().refine(
+    (val) => {
+      if (!val) return true; // Cho phép rỗng (khi sửa)
+      return val.length >= 6 && /^(?=.*[A-Za-z])(?=.*\d).+$/.test(val);
+    },
+    { message: "Mật khẩu phải ít nhất 6 ký tự, có chữ và số" }
+  ),
   hoTen: z.string().min(1, "Họ tên không được để trống"),
   email: z.string().email("Email không hợp lệ"),
   soDt: z
@@ -53,7 +57,8 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
       setValue("taiKhoan", duLieuSua.taiKhoan);
       setValue("hoTen", duLieuSua.hoTen);
       setValue("email", duLieuSua.email);
-      setValue("soDt", duLieuSua.soDt);
+      // 👇 FIX 1: API trả về soDT (T hoa), sửa lại để hiện số điện thoại cũ
+      setValue("soDt", duLieuSua.soDT); 
       setValue("maLoaiNguoiDung", duLieuSua.maLoaiNguoiDung);
       setValue("matKhau", "");
     } else {
@@ -74,12 +79,19 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
         ...data,
         maNhom: MA_NHOM,
         ngayTao: duLieuSua ? duLieuSua.ngayTao : layNgayHienTai(),
+        // 👇 FIX 2: Map lại key soDt (form) -> soDT (API)
+        soDT: data.soDt 
       };
 
       if (duLieuSua) {
+        // Nếu không nhập mật khẩu thì lấy lại mật khẩu cũ
+        if (!data.matKhau) {
+          duLieuGuiDi.matKhau = duLieuSua.matKhau;
+        }
         await dichVuNguoiDung.capNhatNguoiDung(duLieuGuiDi);
         alert("Cập nhật thành công!");
       } else {
+        if (!data.matKhau) return alert("Vui lòng nhập mật khẩu!");
         await dichVuNguoiDung.themNguoiDung(duLieuGuiDi);
         alert("Thêm mới thành công!");
       }
