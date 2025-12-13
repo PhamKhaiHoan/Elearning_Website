@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import ModalKhoaHoc from "./ModalKhoaHoc";
 import ModalGhiDanh from "./ModalGhiDanh";
+import useDebounce from "../../extensions/hooks/useDebounce";
 
 const TrangKhoaHoc = () => {
   const dispatch = useDispatch();
@@ -23,31 +24,48 @@ const TrangKhoaHoc = () => {
   const [tenKhoaHoc, setTenKhoaHoc] = useState("");
   const [trangHienTai, setTrangHienTai] = useState(1);
 
+  const tenKhoaHocDebounce = useDebounce(tenKhoaHoc, 500);
+
   const [modalMo, setModalMo] = useState(false);
   const [khoaHocSua, setKhoaHocSua] = useState(null);
-
   const [modalGhiDanhMo, setModalGhiDanhMo] = useState(false);
   const [maKhoaHocGhiDanh, setMaKhoaHocGhiDanh] = useState(null);
+
+  useEffect(() => {
+    setTrangHienTai(1);
+    dispatch(
+      layDanhSachKhoaHocThunk({
+        tenKhoaHoc: tenKhoaHocDebounce,
+        trang: 1,
+        soLuong: 10,
+      })
+    );
+  }, [tenKhoaHocDebounce]);
+
+  // Effect 2: Chuyển trang
+  useEffect(() => {
+    if (trangHienTai !== 1) {
+      dispatch(
+        layDanhSachKhoaHocThunk({
+          tenKhoaHoc: tenKhoaHocDebounce,
+          trang: trangHienTai,
+          soLuong: 10,
+        })
+      );
+    }
+  }, [trangHienTai]);
 
   const layDuLieu = () => {
     dispatch(
       layDanhSachKhoaHocThunk({
-        tenKhoaHoc: tenKhoaHoc,
+        tenKhoaHoc: tenKhoaHocDebounce,
         trang: trangHienTai,
         soLuong: 10,
       })
     );
   };
 
-  useEffect(() => {
-    layDuLieu();
-  }, [trangHienTai, tenKhoaHoc]);
-
-  const xuLyTimKiem = (e) => {
-    e.preventDefault();
-    setTrangHienTai(1);
-    layDuLieu();
-  };
+  const xuLyTimKiem = (e) => e.preventDefault();
 
   const xuLyXoa = async (maKhoaHoc) => {
     if (window.confirm(`Bạn có chắc muốn xóa khóa học ${maKhoaHoc}?`)) {
@@ -65,21 +83,17 @@ const TrangKhoaHoc = () => {
     setKhoaHocSua(null);
     setModalMo(true);
   };
-
   const moModalSua = (kh) => {
     setKhoaHocSua(kh);
     setModalMo(true);
   };
-
   const moModalGhiDanh = (maKhoaHoc) => {
     setMaKhoaHocGhiDanh(maKhoaHoc);
     setModalGhiDanhMo(true);
   };
-
   const thayDoiTrang = (soTrangMoi) => {
-    if (soTrangMoi >= 1 && soTrangMoi <= tongSoTrang) {
+    if (soTrangMoi >= 1 && soTrangMoi <= tongSoTrang)
       setTrangHienTai(soTrangMoi);
-    }
   };
 
   return (
@@ -90,8 +104,6 @@ const TrangKhoaHoc = () => {
         duLieuSua={khoaHocSua}
         taiLaiTrang={layDuLieu}
       />
-
-      {/* Modal Ghi Danh (Mới) */}
       <ModalGhiDanh
         dangMo={modalGhiDanhMo}
         dongModal={() => setModalGhiDanhMo(false)}
@@ -109,7 +121,6 @@ const TrangKhoaHoc = () => {
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </form>
-
         <button
           onClick={moModalThem}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md transition-colors"
@@ -176,7 +187,6 @@ const TrangKhoaHoc = () => {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center gap-2">
-                        {/* Nút Ghi Danh */}
                         <button
                           onClick={() => moModalGhiDanh(kh.maKhoaHoc)}
                           className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors"
@@ -184,7 +194,6 @@ const TrangKhoaHoc = () => {
                         >
                           <UserCog size={18} />
                         </button>
-
                         <button
                           onClick={() => moModalSua(kh)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
@@ -213,38 +222,32 @@ const TrangKhoaHoc = () => {
             </tbody>
           </table>
         </div>
-
-        {/* Thanh Phân Trang */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
           <span className="text-sm text-gray-500">
             Trang{" "}
             <span className="font-medium text-gray-900">{trangHienTai}</span> /{" "}
             {tongSoTrang}
           </span>
-
           <div className="flex gap-2">
             <button
               onClick={() => thayDoiTrang(trangHienTai - 1)}
               disabled={trangHienTai === 1}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors
-                  ${
-                    trangHienTai === 1
-                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                      : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
-                  }`}
+              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors ${
+                trangHienTai === 1
+                  ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                  : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
+              }`}
             >
               <ChevronLeft size={16} /> Trước
             </button>
-
             <button
               onClick={() => thayDoiTrang(trangHienTai + 1)}
               disabled={trangHienTai === tongSoTrang}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors
-                  ${
-                    trangHienTai === tongSoTrang
-                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                      : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
-                  }`}
+              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors ${
+                trangHienTai === tongSoTrang
+                  ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                  : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
+              }`}
             >
               Sau <ChevronRight size={16} />
             </button>

@@ -5,7 +5,7 @@ export const dichVuKhoaHoc = {
   layDanhSachKhoaHoc: (tenKhoaHoc = "", trang = 1, soLuong = 10) => {
     let url = `/api/QuanLyKhoaHoc/LayDanhSachKhoaHoc_PhanTrang?MaNhom=${MA_NHOM}&page=${trang}&pageSize=${soLuong}`;
     if (tenKhoaHoc.trim() !== "") {
-      url += `&tenKhoaHoc=${tenKhoaHoc}`;
+      url += `&tenKhoaHoc=${encodeURIComponent(tenKhoaHoc)}`;
     }
     return dichVuHttp.get(url);
   },
@@ -15,13 +15,11 @@ export const dichVuKhoaHoc = {
       `/api/QuanLyKhoaHoc/LayDanhSachKhoaHoc?MaNhom=${MA_NHOM}`
     );
   },
-
   layThongTinKhoaHoc: (maKhoaHoc) => {
     return dichVuHttp.get(
       `/api/QuanLyKhoaHoc/LayThongTinKhoaHoc?maKhoaHoc=${maKhoaHoc}`
     );
   },
-
   layDanhMucKhoaHoc: () => {
     return dichVuHttp.get("/api/QuanLyKhoaHoc/LayDanhMucKhoaHoc");
   },
@@ -42,9 +40,7 @@ export const dichVuKhoaHoc = {
   layDsNguoiDungChuaGhiDanh: (maKhoaHoc) => {
     return dichVuHttp.post(
       `/api/QuanLyNguoiDung/LayDanhSachNguoiDungChuaGhiDanh`,
-      {
-        maKhoaHoc: maKhoaHoc,
-      }
+      { maKhoaHoc: maKhoaHoc }
     );
   },
   layDsHocVienKhoaHoc: (maKhoaHoc) => {

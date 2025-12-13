@@ -11,6 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import ModalNguoiDung from "./ModalNguoiDung";
+import useDebounce from "../../extensions/hooks/useDebounce";
 
 const TrangNguoiDung = () => {
   const dispatch = useDispatch();
@@ -21,27 +22,46 @@ const TrangNguoiDung = () => {
   const [tuKhoa, setTuKhoa] = useState("");
   const [trangHienTai, setTrangHienTai] = useState(1);
 
+  const tuKhoaDebounce = useDebounce(tuKhoa, 500);
+
   const [modalMo, setModalMo] = useState(false);
-  const [nguoiDungSua, setNguoiDungSua] = useState(null); 
+  const [nguoiDungSua, setNguoiDungSua] = useState(null);
+
+  useEffect(() => {
+    setTrangHienTai(1);
+    dispatch(
+      layDanhSachNguoiDungThunk({
+        tuKhoa: tuKhoaDebounce,
+        trang: 1,
+        soLuong: 30,
+      })
+    );
+  }, [tuKhoaDebounce]);
+
+  useEffect(() => {
+    if (trangHienTai !== 1) {
+      dispatch(
+        layDanhSachNguoiDungThunk({
+          tuKhoa: tuKhoaDebounce,
+          trang: trangHienTai,
+          soLuong: 30,
+        })
+      );
+    }
+  }, [trangHienTai]);
 
   const layDuLieu = () => {
     dispatch(
       layDanhSachNguoiDungThunk({
-        tuKhoa: tuKhoa,
+        tuKhoa: tuKhoaDebounce,
         trang: trangHienTai,
         soLuong: 30,
       })
     );
   };
 
-  useEffect(() => {
-    layDuLieu();
-  }, [trangHienTai, tuKhoa]);
-
   const xuLyTimKiem = (e) => {
     e.preventDefault();
-    setTrangHienTai(1); 
-    layDuLieu();
   };
 
   const xuLyXoa = async (taiKhoan) => {
@@ -64,16 +84,13 @@ const TrangNguoiDung = () => {
     setNguoiDungSua(user);
     setModalMo(true);
   };
-
   const thayDoiTrang = (soTrangMoi) => {
-    if (soTrangMoi >= 1 && soTrangMoi <= tongSoTrang) {
+    if (soTrangMoi >= 1 && soTrangMoi <= tongSoTrang)
       setTrangHienTai(soTrangMoi);
-    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Modal Popup */}
       <ModalNguoiDung
         dangMo={modalMo}
         dongModal={() => setModalMo(false)}
@@ -92,17 +109,14 @@ const TrangNguoiDung = () => {
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </form>
-
         <button
           onClick={moModalThem}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
         >
-          <Plus size={20} />
-          <span>Thêm Người Dùng</span>
+          <Plus size={20} /> <span>Thêm Người Dùng</span>
         </button>
       </div>
 
-      {/* Bảng Dữ Liệu */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -183,38 +197,32 @@ const TrangNguoiDung = () => {
             </tbody>
           </table>
         </div>
-
-        {/* Thanh Phân Trang */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
           <span className="text-sm text-gray-500">
             Trang{" "}
             <span className="font-medium text-gray-900">{trangHienTai}</span> /{" "}
             {tongSoTrang}
           </span>
-
           <div className="flex gap-2">
             <button
               onClick={() => thayDoiTrang(trangHienTai - 1)}
               disabled={trangHienTai === 1}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors
-                  ${
-                    trangHienTai === 1
-                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                      : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
-                  }`}
+              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors ${
+                trangHienTai === 1
+                  ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                  : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
+              }`}
             >
               <ChevronLeft size={16} /> Trước
             </button>
-
             <button
               onClick={() => thayDoiTrang(trangHienTai + 1)}
               disabled={trangHienTai === tongSoTrang}
-              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors
-                  ${
-                    trangHienTai === tongSoTrang
-                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                      : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
-                  }`}
+              className={`flex items-center gap-1 px-3 py-1 rounded-md border text-sm font-medium transition-colors ${
+                trangHienTai === tongSoTrang
+                  ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                  : "border-gray-300 text-gray-700 hover:bg-white hover:border-blue-500 hover:text-blue-600 bg-white shadow-sm"
+              }`}
             >
               Sau <ChevronRight size={16} />
             </button>

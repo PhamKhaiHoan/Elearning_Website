@@ -16,10 +16,9 @@ const layNgayHienTai = () => {
 
 const schemaNguoiDung = z.object({
   taiKhoan: z.string().min(1, "Tài khoản không được để trống"),
-  // Logic mật khẩu: Thêm mới bắt buộc, Sửa thì không bắt buộc (nếu không nhập)
   matKhau: z.string().refine(
     (val) => {
-      if (!val) return true; // Cho phép rỗng (khi sửa)
+      if (!val) return true; 
       return val.length >= 6 && /^(?=.*[A-Za-z])(?=.*\d).+$/.test(val);
     },
     { message: "Mật khẩu phải ít nhất 6 ký tự, có chữ và số" }
@@ -57,7 +56,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
       setValue("taiKhoan", duLieuSua.taiKhoan);
       setValue("hoTen", duLieuSua.hoTen);
       setValue("email", duLieuSua.email);
-      // 👇 FIX 1: API trả về soDT (T hoa), sửa lại để hiện số điện thoại cũ
       setValue("soDt", duLieuSua.soDT); 
       setValue("maLoaiNguoiDung", duLieuSua.maLoaiNguoiDung);
       setValue("matKhau", "");
@@ -79,12 +77,10 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
         ...data,
         maNhom: MA_NHOM,
         ngayTao: duLieuSua ? duLieuSua.ngayTao : layNgayHienTai(),
-        // 👇 FIX 2: Map lại key soDt (form) -> soDT (API)
         soDT: data.soDt 
       };
 
       if (duLieuSua) {
-        // Nếu không nhập mật khẩu thì lấy lại mật khẩu cũ
         if (!data.matKhau) {
           duLieuGuiDi.matKhau = duLieuSua.matKhau;
         }
