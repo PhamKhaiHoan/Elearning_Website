@@ -127,7 +127,7 @@ const ModalKhoaHoc = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
         formData.append("maNhom", MA_NHOM);
         formData.append("ngayTao", layNgayHienTai());
         formData.append("maDanhMucKhoaHoc", data.maDanhMucKhoaHoc);
-        formData.append("taiKhoanNguoiTao", taiKhoanNguoiTao); // Dùng user đang login
+        formData.append("taiKhoanNguoiTao", taiKhoanNguoiTao); 
         formData.append("file", fileHinhAnh);
 
         await dichVuKhoaHoc.themKhoaHoc(formData);

@@ -13,20 +13,21 @@ import {
 import ModalNguoiDung from "./ModalNguoiDung";
 import useDebounce from "../../extensions/hooks/useDebounce";
 import { toast } from "react-toastify";
+import ModalXacNhan from "../../components/ModalXacNhan";
 
 const TrangNguoiDung = () => {
   const dispatch = useDispatch();
   const { danhSachNguoiDung, dangTai, tongSoTrang } = useSelector(
     (state) => state.nguoiDung
   );
-
   const [tuKhoa, setTuKhoa] = useState("");
   const [trangHienTai, setTrangHienTai] = useState(1);
-
   const tuKhoaDebounce = useDebounce(tuKhoa, 500);
-
   const [modalMo, setModalMo] = useState(false);
   const [nguoiDungSua, setNguoiDungSua] = useState(null);
+
+  const [modalXoaOpen, setModalXoaOpen] = useState(false);
+  const [idCanXoa, setIdCanXoa] = useState(null);
 
   useEffect(() => {
     setTrangHienTai(1);
@@ -61,19 +62,20 @@ const TrangNguoiDung = () => {
     );
   };
 
-  const xuLyTimKiem = (e) => {
-    e.preventDefault();
+  const xuLyTimKiem = (e) => e.preventDefault();
+
+  const moModalXoa = (taiKhoan) => {
+    setIdCanXoa(taiKhoan);
+    setModalXoaOpen(true);
   };
 
-  const xuLyXoa = async (taiKhoan) => {
-    if (window.confirm(`Bạn có chắc muốn xóa tài khoản: ${taiKhoan}?`)) {
-      try {
-        await dichVuNguoiDung.xoaNguoiDung(taiKhoan);
-        toast.success("Xóa thành công!");
-        layDuLieu();
-      } catch (error) {
-        toast.error(error.response?.data || "Có lỗi xảy ra khi xóa!");
-      }
+  const xacNhanXoa = async () => {
+    try {
+      await dichVuNguoiDung.xoaNguoiDung(idCanXoa);
+      toast.success("Xóa thành công!");
+      layDuLieu();
+    } catch (error) {
+      toast.error(error.response?.data || "Có lỗi xảy ra khi xóa!");
     }
   };
 
@@ -97,6 +99,14 @@ const TrangNguoiDung = () => {
         dongModal={() => setModalMo(false)}
         duLieuSua={nguoiDungSua}
         taiLaiTrang={layDuLieu}
+      />
+
+      <ModalXacNhan
+        dangMo={modalXoaOpen}
+        dongModal={() => setModalXoaOpen(false)}
+        xacNhan={xacNhanXoa}
+        tieuDe="Xóa Người Dùng"
+        noiDung={`Bạn có chắc chắn muốn xóa tài khoản "${idCanXoa}" không? Hành động này không thể hoàn tác.`}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
@@ -178,7 +188,7 @@ const TrangNguoiDung = () => {
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => xuLyXoa(user.taiKhoan)}
+                          onClick={() => moModalXoa(user.taiKhoan)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                           title="Xóa"
                         >

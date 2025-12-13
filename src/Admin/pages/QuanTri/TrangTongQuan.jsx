@@ -194,7 +194,7 @@ const TrangTongQuan = () => {
           </div>
         </div>
 
-        {/* BIỂU ĐỒ TOP GHI DANH */}
+        {/* BIỂU ĐỒ TOP */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-112.5">
           <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
             <BarChart3 className="text-green-500" size={20} />

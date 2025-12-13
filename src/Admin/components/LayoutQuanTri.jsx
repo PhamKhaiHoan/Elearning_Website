@@ -63,7 +63,7 @@ const LayoutQuanTri = () => {
         </div>
       </div>
 
-      {/* --- MAIN CONTENT --- */}
+      {/* MAIN CONTENT */}
       <div className="flex-1 overflow-auto">
         {/* Header */}
         <header className="h-16 bg-white shadow-sm flex items-center justify-between px-6 sticky top-0 z-10">

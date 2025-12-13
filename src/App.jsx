@@ -8,16 +8,18 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <ToastContainer position="top-right" autoClose={3000} theme="colored" />,
+    <>
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
 
-    <Routes>
-      <Route path="/" element={<Navigate to="/admin" />} />
-      <Route path="/admin" element={<LayoutQuanTri />}>
-        <Route index element={<TrangTongQuan />} />
-        <Route path="users" element={<TrangNguoiDung />} />
-        <Route path="courses" element={<TrangKhoaHoc />} />
-      </Route>
-    </Routes>
+      <Routes>
+        <Route path="/" element={<Navigate to="/admin" />} />
+        <Route path="/admin" element={<LayoutQuanTri />}>
+          <Route index element={<TrangTongQuan />} />
+          <Route path="users" element={<TrangNguoiDung />} />
+          <Route path="courses" element={<TrangKhoaHoc />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

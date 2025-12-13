@@ -15,22 +15,23 @@ import ModalKhoaHoc from "./ModalKhoaHoc";
 import ModalGhiDanh from "./ModalGhiDanh";
 import useDebounce from "../../extensions/hooks/useDebounce";
 import { toast } from "react-toastify";
+import ModalXacNhan from "../../components/ModalXacNhan";
 
 const TrangKhoaHoc = () => {
   const dispatch = useDispatch();
   const { danhSachKhoaHoc, dangTai, tongSoTrang } = useSelector(
     (state) => state.khoaHoc
   );
-
   const [tenKhoaHoc, setTenKhoaHoc] = useState("");
   const [trangHienTai, setTrangHienTai] = useState(1);
-
   const tenKhoaHocDebounce = useDebounce(tenKhoaHoc, 500);
-
   const [modalMo, setModalMo] = useState(false);
   const [khoaHocSua, setKhoaHocSua] = useState(null);
   const [modalGhiDanhMo, setModalGhiDanhMo] = useState(false);
   const [maKhoaHocGhiDanh, setMaKhoaHocGhiDanh] = useState(null);
+
+  const [modalXoaOpen, setModalXoaOpen] = useState(false);
+  const [idCanXoa, setIdCanXoa] = useState(null);
 
   useEffect(() => {
     setTrangHienTai(1);
@@ -42,8 +43,6 @@ const TrangKhoaHoc = () => {
       })
     );
   }, [tenKhoaHocDebounce]);
-
-  // Effect 2: Chuyển trang
   useEffect(() => {
     if (trangHienTai !== 1) {
       dispatch(
@@ -65,18 +64,20 @@ const TrangKhoaHoc = () => {
       })
     );
   };
-
   const xuLyTimKiem = (e) => e.preventDefault();
 
-  const xuLyXoa = async (maKhoaHoc) => {
-    if (window.confirm(`Bạn có chắc muốn xóa khóa học ${maKhoaHoc}?`)) {
-      try {
-        await dichVuKhoaHoc.xoaKhoaHoc(maKhoaHoc);
-        toast.success("Xóa thành công!");
-        layDuLieu();
-      } catch (error) {
-        toast.error(error.response?.data || "Xóa thất bại!");
-      }
+  const moModalXoa = (maKhoaHoc) => {
+    setIdCanXoa(maKhoaHoc);
+    setModalXoaOpen(true);
+  };
+
+  const xacNhanXoa = async () => {
+    try {
+      await dichVuKhoaHoc.xoaKhoaHoc(idCanXoa);
+      toast.success("Xóa thành công!");
+      layDuLieu();
+    } catch (error) {
+      toast.error(error.response?.data || "Xóa thất bại!");
     }
   };
 
@@ -109,6 +110,14 @@ const TrangKhoaHoc = () => {
         dangMo={modalGhiDanhMo}
         dongModal={() => setModalGhiDanhMo(false)}
         maKhoaHoc={maKhoaHocGhiDanh}
+      />
+
+      <ModalXacNhan
+        dangMo={modalXoaOpen}
+        dongModal={() => setModalXoaOpen(false)}
+        xacNhan={xacNhanXoa}
+        tieuDe="Xóa Khóa Học"
+        noiDung={`Bạn có chắc muốn xóa khóa học "${idCanXoa}" không? Dữ liệu này không thể khôi phục.`}
       />
 
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
@@ -203,7 +212,7 @@ const TrangKhoaHoc = () => {
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => xuLyXoa(kh.maKhoaHoc)}
+                          onClick={() => moModalXoa(kh.maKhoaHoc)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                           title="Xóa"
                         >

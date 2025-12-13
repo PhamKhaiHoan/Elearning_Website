@@ -2,17 +2,19 @@ import React, { useEffect, useState } from "react";
 import { dichVuKhoaHoc } from "../../services/dichVuKhoaHoc";
 import { X, UserPlus, Trash2, UserCheck } from "lucide-react";
 import { toast } from "react-toastify";
+import ModalXacNhan from "../../components/ModalXacNhan";
 
 const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
   const [dsChuaGhiDanh, setDsChuaGhiDanh] = useState([]);
   const [dsDaGhiDanh, setDsDaGhiDanh] = useState([]);
   const [taiKhoanChon, setTaiKhoanChon] = useState("");
-
   const [dangTai, setDangTai] = useState(false);
+
+  const [modalXoaOpen, setModalXoaOpen] = useState(false);
+  const [taiKhoanCanXoa, setTaiKhoanCanXoa] = useState(null);
 
   const layDuLieuGhiDanh = async () => {
     if (!maKhoaHoc) return;
-
     setDangTai(true);
     try {
       const [resChuaGhiDanh, resDaGhiDanh] = await Promise.all([
@@ -47,15 +49,18 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
     }
   };
 
-  const xuLyHuyGhiDanh = async (taiKhoan) => {
-    if (window.confirm(`Xóa học viên ${taiKhoan} khỏi khóa học?`)) {
-      try {
-        await dichVuKhoaHoc.huyGhiDanh(maKhoaHoc, taiKhoan);
-        toast.success("Hủy ghi danh thành công!");
-        layDuLieuGhiDanh();
-      } catch (error) {
-        toast.error(error.response?.data || "Hủy thất bại!");
-      }
+  const moModalHuyGhiDanh = (taiKhoan) => {
+    setTaiKhoanCanXoa(taiKhoan);
+    setModalXoaOpen(true);
+  };
+
+  const xacNhanHuyGhiDanh = async () => {
+    try {
+      await dichVuKhoaHoc.huyGhiDanh(maKhoaHoc, taiKhoanCanXoa);
+      toast.success("Hủy ghi danh thành công!");
+      layDuLieuGhiDanh();
+    } catch (error) {
+      toast.error(error.response?.data || "Hủy thất bại!");
     }
   };
 
@@ -63,8 +68,15 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <ModalXacNhan
+        dangMo={modalXoaOpen}
+        dongModal={() => setModalXoaOpen(false)}
+        xacNhan={xacNhanHuyGhiDanh}
+        tieuDe="Xóa Học Viên"
+        noiDung={`Bạn có chắc muốn xóa học viên "${taiKhoanCanXoa}" khỏi khóa học này?`}
+      />
+
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 border border-gray-100">
-        {/* Header */}
         <div className="flex justify-between items-center p-4 border-b bg-blue-50 shrink-0">
           <h3 className="text-lg font-bold text-blue-700 flex items-center gap-2">
             <UserCheck size={24} /> Quản Lý Học Viên - Khóa {maKhoaHoc}
@@ -85,7 +97,6 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
             </div>
           ) : (
             <>
-              {/* THÊM HỌC VIÊN */}
               <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                 <h4 className="font-semibold mb-3 text-gray-700 flex items-center gap-2">
                   <UserPlus size={18} className="text-blue-500" /> Thêm học viên
@@ -117,7 +128,6 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
                 </div>
               </div>
 
-              {/* DANH SÁCH ĐÃ GHI DANH */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
                 <div className="px-6 py-4 border-b border-gray-100 bg-white">
                   <h4 className="font-bold text-gray-700">
@@ -127,7 +137,6 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
                     </span>
                   </h4>
                 </div>
-
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead className="bg-gray-50 uppercase text-gray-500 font-semibold text-xs">
@@ -156,7 +165,7 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
                             </td>
                             <td className="px-6 py-3 text-center">
                               <button
-                                onClick={() => xuLyHuyGhiDanh(hv.taiKhoan)}
+                                onClick={() => moModalHuyGhiDanh(hv.taiKhoan)}
                                 className="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
                                 title="Xóa khỏi khóa học"
                               >
