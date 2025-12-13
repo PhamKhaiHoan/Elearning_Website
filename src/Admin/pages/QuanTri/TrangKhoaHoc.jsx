@@ -10,9 +10,9 @@ import {
   ChevronLeft,
   ChevronRight,
   UserCog,
-} from "lucide-react"; 
+} from "lucide-react";
 import ModalKhoaHoc from "./ModalKhoaHoc";
-import ModalGhiDanh from "./ModalGhiDanh"; 
+import ModalGhiDanh from "./ModalGhiDanh";
 
 const TrangKhoaHoc = () => {
   const dispatch = useDispatch();
@@ -176,7 +176,7 @@ const TrangKhoaHoc = () => {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center gap-2">
-                        {/* Nút Ghi Danh (Mới) */}
+                        {/* Nút Ghi Danh */}
                         <button
                           onClick={() => moModalGhiDanh(kh.maKhoaHoc)}
                           className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors"

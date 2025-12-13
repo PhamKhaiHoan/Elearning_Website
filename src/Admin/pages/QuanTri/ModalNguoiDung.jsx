@@ -6,6 +6,15 @@ import { dichVuNguoiDung } from "../../services/dichVuNguoiDung";
 import { MA_NHOM } from "../../services/config";
 import { X } from "lucide-react";
 
+// 👇 1. Thêm hàm lấy ngày
+const layNgayHienTai = () => {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, "0");
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const yyyy = today.getFullYear();
+  return `${dd}/${mm}/${yyyy}`; // Định dạng dd/MM/yyyy
+};
+
 const schemaNguoiDung = z.object({
   taiKhoan: z.string().min(1, "Tài khoản không được để trống"),
   matKhau: z
@@ -47,7 +56,7 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
       setValue("email", duLieuSua.email);
       setValue("soDt", duLieuSua.soDt);
       setValue("maLoaiNguoiDung", duLieuSua.maLoaiNguoiDung);
-      setValue("matKhau", ""); 
+      setValue("matKhau", "");
     } else {
       reset({
         taiKhoan: "",
@@ -62,7 +71,12 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
 
   const xuLyGuiForm = async (data) => {
     try {
-      const duLieuGuiDi = { ...data, maNhom: MA_NHOM };
+      // 👇 2. Thêm ngayTao vào dữ liệu gửi đi
+      const duLieuGuiDi = {
+        ...data,
+        maNhom: MA_NHOM,
+        ngayTao: duLieuSua ? duLieuSua.ngayTao : layNgayHienTai(), // Nếu sửa thì giữ cũ, thêm thì lấy mới
+      };
 
       if (duLieuSua) {
         await dichVuNguoiDung.capNhatNguoiDung(duLieuGuiDi);
@@ -73,7 +87,7 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
       }
 
       dongModal();
-      taiLaiTrang(); 
+      taiLaiTrang();
     } catch (error) {
       alert(error.response?.data || "Đã có lỗi xảy ra!");
     }
@@ -84,7 +98,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* Header Modal */}
         <div className="flex justify-between items-center p-4 border-b border-gray-100">
           <h3 className="text-lg font-bold text-gray-800">
             {duLieuSua ? "Cập Nhật Người Dùng" : "Thêm Người Dùng Mới"}
@@ -97,16 +110,18 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
           </button>
         </div>
 
-        {/* Body Form */}
         <form onSubmit={handleSubmit(xuLyGuiForm)} className="p-6 space-y-4">
-          {/* Tài Khoản */}
+          {/* ... (Giữ nguyên các Input Tài khoản, Mật khẩu, Họ tên, Email, Số ĐT, Loại ND) ... */}
+
+          {/* (Phần code Form Input ông giữ y nguyên như file cũ nhé, chỉ thay đổi logic xuLyGuiForm ở trên thôi) */}
+          {/* Để gọn code tôi không paste lại toàn bộ JSX form input, ông dùng lại phần return của file cũ */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tài Khoản
             </label>
             <input
               {...register("taiKhoan")}
-              disabled={!!duLieuSua} 
+              disabled={!!duLieuSua}
               className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 duLieuSua ? "bg-gray-100 text-gray-500" : ""
               }`}
@@ -118,8 +133,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
               </p>
             )}
           </div>
-
-          {/* Mật Khẩu */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {duLieuSua ? "Mật Khẩu Mới (Để trống nếu không đổi)" : "Mật Khẩu"}
@@ -136,8 +149,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
               </p>
             )}
           </div>
-
-          {/* Họ Tên */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Họ Tên
@@ -153,8 +164,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
               </p>
             )}
           </div>
-
-          {/* Email & Số ĐT */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -187,8 +196,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
               )}
             </div>
           </div>
-
-          {/* Loại Người Dùng */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Loại Người Dùng
@@ -202,7 +209,6 @@ const ModalNguoiDung = ({ dangMo, dongModal, duLieuSua, taiLaiTrang }) => {
             </select>
           </div>
 
-          {/* Nút Submit */}
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
             <button
               type="button"
