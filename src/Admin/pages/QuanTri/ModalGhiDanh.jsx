@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { dichVuKhoaHoc } from "../../services/dichVuKhoaHoc";
-import { X, UserPlus, Trash2, UserCheck } from "lucide-react";
+import { X, UserPlus, Trash2, UserCheck, Check, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 import ModalXacNhan from "../../components/ModalXacNhan";
 
 const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
   const [dsChuaGhiDanh, setDsChuaGhiDanh] = useState([]);
+  const [dsChoXetDuyet, setDsChoXetDuyet] = useState([]);
   const [dsDaGhiDanh, setDsDaGhiDanh] = useState([]);
   const [taiKhoanChon, setTaiKhoanChon] = useState("");
   const [dangTai, setDangTai] = useState(false);
@@ -17,11 +18,13 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
     if (!maKhoaHoc) return;
     setDangTai(true);
     try {
-      const [resChuaGhiDanh, resDaGhiDanh] = await Promise.all([
+      const [resChuaGhiDanh, resChoXetDuyet, resDaGhiDanh] = await Promise.all([
         dichVuKhoaHoc.layDsNguoiDungChuaGhiDanh(maKhoaHoc),
+        dichVuKhoaHoc.layDsHocVienChoXetDuyet(maKhoaHoc),
         dichVuKhoaHoc.layDsHocVienKhoaHoc(maKhoaHoc),
       ]);
       setDsChuaGhiDanh(resChuaGhiDanh.data);
+      setDsChoXetDuyet(resChoXetDuyet.data);
       setDsDaGhiDanh(resDaGhiDanh.data);
     } catch (error) {
       console.log("Lỗi load dữ liệu ghi danh:", error);
@@ -37,11 +40,14 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
     }
   }, [dangMo, maKhoaHoc]);
 
-  const xuLyGhiDanh = async () => {
-    if (!taiKhoanChon) return toast.error("Vui lòng chọn người dùng!");
+  // Hàm Ghi Danh
+  const xuLyGhiDanh = async (taiKhoan) => {
+    const accountToEnroll = taiKhoan || taiKhoanChon;
+    if (!accountToEnroll) return toast.warning("Vui lòng chọn người dùng!");
+
     try {
-      await dichVuKhoaHoc.ghiDanhKhoaHoc(maKhoaHoc, taiKhoanChon);
-      toast.success("Ghi danh thành công!");
+      await dichVuKhoaHoc.ghiDanhKhoaHoc(maKhoaHoc, accountToEnroll);
+      toast.success(`Đã ghi danh thành công tài khoản: ${accountToEnroll}`);
       layDuLieuGhiDanh();
       setTaiKhoanChon("");
     } catch (error) {
@@ -72,8 +78,8 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
         dangMo={modalXoaOpen}
         dongModal={() => setModalXoaOpen(false)}
         xacNhan={xacNhanHuyGhiDanh}
-        tieuDe="Xóa Học Viên"
-        noiDung={`Bạn có chắc muốn xóa học viên "${taiKhoanCanXoa}" khỏi khóa học này?`}
+        tieuDe="Hủy Ghi Danh / Từ Chối"
+        noiDung={`Bạn có chắc muốn xóa/từ chối học viên "${taiKhoanCanXoa}" khỏi khóa học này?`}
       />
 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 border border-gray-100">
@@ -120,7 +126,7 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
                     </select>
                   </div>
                   <button
-                    onClick={xuLyGhiDanh}
+                    onClick={() => xuLyGhiDanh(null)}
                     className="bg-green-600 hover:bg-green-700 text-white px-6 h-11 rounded-lg flex items-center gap-2 font-medium transition-all shadow-sm active:scale-95"
                   >
                     <UserPlus size={18} /> Ghi Danh
@@ -128,10 +134,72 @@ const ModalGhiDanh = ({ dangMo, dongModal, maKhoaHoc }) => {
                 </div>
               </div>
 
+              {dsChoXetDuyet.length > 0 && (
+                <div className="bg-white rounded-xl border border-orange-200 shadow-sm overflow-hidden flex flex-col">
+                  <div className="px-6 py-4 border-b border-orange-100 bg-orange-50">
+                    <h4 className="font-bold text-orange-700 flex items-center gap-2">
+                      <Clock size={18} /> Học viên chờ xét duyệt
+                      <span className="bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full text-xs ml-2">
+                        {dsChoXetDuyet.length}
+                      </span>
+                    </h4>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-orange-50/50 uppercase text-orange-600 font-semibold text-xs">
+                        <tr>
+                          <th className="px-6 py-3">STT</th>
+                          <th className="px-6 py-3">Tài Khoản</th>
+                          <th className="px-6 py-3">Họ Tên</th>
+                          <th className="px-6 py-3 text-center">Thao Tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-orange-100">
+                        {dsChoXetDuyet.map((hv, index) => (
+                          <tr
+                            key={hv.taiKhoan}
+                            className="hover:bg-orange-50/30 transition-colors"
+                          >
+                            <td className="px-6 py-3 font-medium text-gray-400">
+                              {index + 1}
+                            </td>
+                            <td className="px-6 py-3 font-semibold text-gray-700">
+                              {hv.taiKhoan}
+                            </td>
+                            <td className="px-6 py-3 text-gray-600">
+                              {hv.hoTen}
+                            </td>
+                            <td className="px-6 py-3 text-center">
+                              <div className="flex justify-center gap-2">
+                                <button
+                                  onClick={() => xuLyGhiDanh(hv.taiKhoan)}
+                                  className="bg-green-100 text-green-600 hover:bg-green-600 hover:text-white p-2 rounded-lg transition-all shadow-sm"
+                                  title="Duyệt / Ghi danh"
+                                >
+                                  <Check size={18} />
+                                </button>
+                                <button
+                                  onClick={() => moModalHuyGhiDanh(hv.taiKhoan)}
+                                  className="bg-red-100 text-red-600 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all shadow-sm"
+                                  title="Từ chối"
+                                >
+                                  <X size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
                 <div className="px-6 py-4 border-b border-gray-100 bg-white">
-                  <h4 className="font-bold text-gray-700">
-                    Danh sách học viên{" "}
+                  <h4 className="font-bold text-gray-700 flex items-center gap-2">
+                    <UserCheck size={18} className="text-green-600" /> Học viên
+                    đã ghi danh
                     <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs ml-2">
                       {dsDaGhiDanh.length}
                     </span>

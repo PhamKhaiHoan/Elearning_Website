@@ -154,7 +154,6 @@ const TrangTongQuan = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* KHÓA HỌC MỚI NHẤT */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-112.5">
           <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <Zap size={20} className="text-orange-500" /> Khóa Học Mới Nhất
@@ -194,7 +193,6 @@ const TrangTongQuan = () => {
           </div>
         </div>
 
-        {/* BIỂU ĐỒ TOP */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-112.5">
           <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
             <BarChart3 className="text-green-500" size={20} />

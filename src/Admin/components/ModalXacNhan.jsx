@@ -7,7 +7,6 @@ const ModalXacNhan = ({ dangMo, dongModal, xacNhan, tieuDe, noiDung }) => {
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-transform border border-red-100">
-        {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-red-50">
           <h3 className="text-lg font-bold text-red-600 flex items-center gap-2">
             <AlertTriangle size={24} /> {tieuDe || "Xác nhận hành động"}
@@ -20,12 +19,10 @@ const ModalXacNhan = ({ dangMo, dongModal, xacNhan, tieuDe, noiDung }) => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6">
           <p className="text-gray-700 text-base">{noiDung}</p>
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end gap-3 p-4 border-t border-gray-100 bg-gray-50">
           <button
             onClick={dongModal}

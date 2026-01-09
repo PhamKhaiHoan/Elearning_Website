@@ -53,6 +53,14 @@ export const dichVuKhoaHoc = {
       { maKhoaHoc }
     );
   },
+
+  layDsHocVienChoXetDuyet: (maKhoaHoc) => {
+    return dichVuHttp.post(
+      `/api/QuanLyNguoiDung/LayDanhSachHocVienChoXetDuyet`,
+      { maKhoaHoc }
+    );
+  },
+
   layDsHocVienKhoaHoc: (maKhoaHoc) => {
     return dichVuHttp.post(`/api/QuanLyNguoiDung/LayDanhSachHocVienKhoaHoc`, {
       maKhoaHoc,
